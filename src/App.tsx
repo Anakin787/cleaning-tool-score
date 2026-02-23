@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { 
   User, 
   Download, 
@@ -8,8 +8,7 @@ import {
   ChevronRight,
   TrendingUp,
   ListOrdered,
-  Info,
-  Image
+  Info
 } from 'lucide-react';
 
 const App = () => {
@@ -48,14 +47,14 @@ const App = () => {
   const saveGraphAsImage = async () => {
     if (!graphBlockRef.current) return;
     try {
-      const canvas = await html2canvas(graphBlockRef.current, {
+      const dataUrl = await toPng(graphBlockRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2,
-        useCORS: true,
+        pixelRatio: 2,
+        cacheBust: true,
       });
       const link = document.createElement('a');
       link.download = `${currentScorer}_${axisLabel}_분포_${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error('이미지 저장 실패:', err);
@@ -259,7 +258,7 @@ const App = () => {
                   className="shrink-0 p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-emerald-500 hover:text-emerald-600 transition-all"
                   title="이미지로 저장"
                 >
-                  <Image size={18} />
+                  <Download size={18} />
                 </button>
               </div>
               
@@ -340,7 +339,7 @@ const App = () => {
                 <div className="flex items-start gap-2 text-slate-400 text-[10px] bg-emerald-50/50 p-3 rounded-xl border border-dashed border-emerald-200">
                   <Info size={14} className="shrink-0 text-emerald-500" />
                   <p className="text-emerald-800">
-                    <strong>지운님!</strong> 그래프의 점이 0점부터 100점까지의 가로축상 위치에 정확히 오도록 수정했습니다. 
+                    <strong>{currentScorer}님!</strong> 그래프의 점이 0점부터 100점까지의 가로축상 위치에 정확히 오도록 수정했습니다. 
                     이름표는 점수가 겹치더라도 서로 잘 보이게끔 자동으로 높낮이가 조절됩니다.
                   </p>
                 </div>
