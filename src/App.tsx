@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { 
   User, 
   Download, 
@@ -7,7 +8,8 @@ import {
   ChevronRight,
   TrendingUp,
   ListOrdered,
-  Info
+  Info,
+  Image
 } from 'lucide-react';
 
 const App = () => {
@@ -41,6 +43,25 @@ const App = () => {
   const [currentScorer, setCurrentScorer] = useState('지운');
   const [axisLabel, setAxisLabel] = useState('식 점수');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const graphBlockRef = useRef<HTMLDivElement>(null);
+
+  const saveGraphAsImage = async () => {
+    if (!graphBlockRef.current) return;
+    try {
+      const canvas = await html2canvas(graphBlockRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.download = `${currentScorer}_${axisLabel}_분포_${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('이미지 저장 실패:', err);
+      alert('이미지 저장에 실패했습니다.');
+    }
+  };
 
   const currentScores = useMemo(() => {
     const scores = allEvaluations[currentScorer] || {};
@@ -228,10 +249,19 @@ const App = () => {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-200 sticky top-8">
-              <h3 className="text-center font-bold text-slate-400 mb-12 tracking-widest uppercase">
-                {currentScorer}의 {axisLabel} 분포
-              </h3>
+            <div ref={graphBlockRef} className="bg-white p-6 rounded-3xl shadow-lg border border-slate-200 sticky top-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="flex-1 text-center font-bold text-slate-400 tracking-widest uppercase">
+                  {currentScorer}의 {axisLabel} 분포
+                </h3>
+                <button
+                  onClick={saveGraphAsImage}
+                  className="shrink-0 p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-emerald-500 hover:text-emerald-600 transition-all"
+                  title="이미지로 저장"
+                >
+                  <Image size={18} />
+                </button>
+              </div>
               
               <div className="relative h-64 mt-10 mb-6 mx-4">
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-100 rounded-full"></div>
@@ -304,8 +334,8 @@ const App = () => {
                         <div className="text-[10px] text-slate-400 font-mono">{p.score}점</div>
                       </div>
                     ))}
-                  </div>
                 </div>
+              </div>
 
                 <div className="flex items-start gap-2 text-slate-400 text-[10px] bg-emerald-50/50 p-3 rounded-xl border border-dashed border-emerald-200">
                   <Info size={14} className="shrink-0 text-emerald-500" />
