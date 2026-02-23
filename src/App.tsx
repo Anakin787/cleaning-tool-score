@@ -39,7 +39,7 @@ const App = () => {
   });
 
   const [currentScorer, setCurrentScorer] = useState('지운');
-  const [axisLabel, setAxisLabel] = useState('이상형 점수');
+  const [axisLabel, setAxisLabel] = useState('식 점수');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentScores = useMemo(() => {
@@ -54,10 +54,12 @@ const App = () => {
   const averageScores = useMemo(() => {
     const totals: Record<string, number> = {};
     const counts: Record<string, number> = {};
-    Object.values(allEvaluations).forEach(evals => {
+    Object.entries(allEvaluations).forEach(([scorer, evals]) => {
+      const sumGiven = Object.values(evals).reduce((a, b) => a + b, 0);
+      const hasEvaluated = sumGiven > 0; // 아직 입력 안 한 사람(전부 0) 제외
       Object.entries(evals).forEach(([name, score]) => {
         totals[name] = (totals[name] || 0) + score;
-        counts[name] = (counts[name] || 0) + 1;
+        if (hasEvaluated) counts[name] = (counts[name] || 0) + 1;
       });
     });
     return Object.entries(totals).map(([name, total]) => ({
@@ -167,7 +169,7 @@ const App = () => {
                   >
                     <span className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${currentScorer === name ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
-                      {name} {name === '지운' && <span className="text-[10px] bg-emerald-100 px-1 rounded text-emerald-600 ml-1">ME</span>}
+                      {name} {currentScorer === name && <span className="text-[10px] bg-emerald-100 px-1 rounded text-emerald-600 ml-1">ME</span>}
                     </span>
                     <ChevronRight size={14} className={currentScorer === name ? 'opacity-100' : 'opacity-0'} />
                   </button>
