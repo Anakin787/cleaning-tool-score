@@ -75,7 +75,7 @@ const App = () => {
   const averageScores = useMemo(() => {
     const totals: Record<string, number> = {};
     const counts: Record<string, number> = {};
-    Object.entries(allEvaluations).forEach(([scorer, evals]) => {
+    Object.entries(allEvaluations).forEach(([, evals]) => {
       const sumGiven = Object.values(evals).reduce((a, b) => a + b, 0);
       const hasEvaluated = sumGiven > 0; // 아직 입력 안 한 사람(전부 0) 제외
       Object.entries(evals).forEach(([name, score]) => {
